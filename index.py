@@ -38,7 +38,7 @@ certificado_file = st.file_uploader("Sube el archivo certificado.xlsx", type=["x
 if certificado_file:
     certificado_df = pd.read_excel(certificado_file, sheet_name=None, engine='openpyxl')
     hoja_certificado = list(certificado_df.keys())[0]  # Tomar la primera hoja
-    certificado_df = certificado_df[hoja_certificado].iloc[27:]
+    certificado_df = certificado_df[hoja_certificado].iloc[26:]
     
     plantilla = pd.ExcelFile(PLANTILLA_PATH, engine='openpyxl')
     
