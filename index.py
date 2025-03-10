@@ -4,10 +4,10 @@ import openpyxl
 from io import BytesIO
 
 # Cargar el archivo PLANTILLA_EXPORT.xlsx desde GitHub
-@st.cache_data
 def load_template():
     template_path = "PLANTILA_EXPORT.xlsx"  # Reemplazar con la URL en GitHub si necesario
-    return pd.ExcelFile(template_path)
+    with open(template_path, "rb") as f:
+        return BytesIO(f.read())
 
 # Función para procesar los datos
 def process_file(uploaded_file, template):
@@ -65,7 +65,7 @@ uploaded_file = st.file_uploader("Sube el archivo certificado.xlsx", type=["xlsx
 
 template = load_template()
 if uploaded_file:
-    wb_processed = process_file(uploaded_file, "PLANTILA_EXPORT.xlsx")
+    wb_processed = process_file(uploaded_file, template)
     
     st.success("Datos procesados correctamente.")
     
@@ -77,4 +77,5 @@ if uploaded_file:
             file_name=f"{sheet}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+
 
