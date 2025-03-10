@@ -4,31 +4,34 @@ import openpyxl
 
 # Función para cargar el archivo certificado
 def cargar_certificado(file):
-    return pd.read_excel(file, sheet_name=0, header=25)
+    # Cargar los datos desde la fila 27 hasta la 127, considerando la fila 26 como cabecera
+    df = pd.read_excel(file, sheet_name=0, header=25, skiprows=0, nrows=101)
+    return df
 
 # Función para cargar la plantilla
 def cargar_plantilla():
     return openpyxl.load_workbook("plantilla_export.xlsx")
 
-# Función para procesar y copiar los datos filtrados en la plantilla
+# Función para aplicar filtros y copiar los datos filtrados a la plantilla
 def procesar_datos(certificado, plantilla):
+    # Filtrar y preparar los datos para las hojas correspondientes
     hoja_o = plantilla["O"]
     hoja_dp = plantilla["DP"]
     hoja_std = plantilla["STD"]
     
-    # Filtro para la hoja "O" (sin "DEND" ni "DSTD")
+    # Filtrar para la hoja "O" (sin "DEND" ni "DSTD")
     datos_o = certificado[~certificado['O'].str.contains('DEND|DSTD', na=False)]
     for i, row in datos_o.iterrows():
         hoja_o.append([row['A'], row['B'], row['C'], row['D'], row['E'], row['F'], row['G'], row['H'],
                        row['I'], row['J'], row['K'], row['L'], row['N'], None, row['Q'], None, row['R']])
 
-    # Filtro para la hoja "DP" (con "DEND")
+    # Filtrar para la hoja "DP" (con "DEND")
     datos_dp = certificado[certificado['O'].str.contains('DEND', na=False)]
     for i, row in datos_dp.iterrows():
         hoja_dp.append([row['A'], row['B'], row['C'], row['D'], row['E'], row['F'], row['G'], row['H'],
                        row['I'], row['J'], row['K'], row['O'], row['N'], row['Q'], None, row['R']])
 
-    # Filtro para la hoja "STD" (con "DSTD")
+    # Filtrar para la hoja "STD" (con "DSTD")
     datos_std = certificado[certificado['O'].str.contains('DSTD', na=False)]
     for i, row in datos_std.iterrows():
         hoja_std.append([row['A'], row['E'], row['G'], row['H'], row['I'], row['J'], row['K'], row['PECLSTDEN02'],
