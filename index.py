@@ -20,9 +20,10 @@ def copy_data_to_template(df, sheet_name, selected_name, template_file):
 
     with BytesIO() as output:
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            # Escribir solo la hoja seleccionada de la plantilla
+            # Escribir solo la hoja seleccionada de la plantilla (sin sobrescribir la primera fila)
             if sheet_name in template.sheet_names:
                 temp_df = template.parse(sheet_name)
+                # Aquí no pasamos `index=False` para que las cabeceras se mantengan como en la plantilla
                 temp_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
             # Filtrar y copiar los datos en la hoja correspondiente
@@ -37,7 +38,7 @@ def copy_data_to_template(df, sheet_name, selected_name, template_file):
                 df_filtered[13] = selected_name  # Colocar el nombre en la columna "K" de la hoja "STD"
             
             # Escribir los datos procesados en la hoja correspondiente
-            df_filtered.to_excel(writer, sheet_name=sheet_name, index=False)
+            df_filtered.to_excel(writer, sheet_name=sheet_name, index=False, header=False, startrow=1)
 
         output.seek(0)  # Asegurarse de que el flujo esté al principio
         return output.getvalue()
