@@ -8,9 +8,9 @@ def load_excel(file):
 # Función para filtrar y copiar los datos en la plantilla
 def process_data(certificado_df, plantilla_df):
     # Hoja "O" - Filtrar y copiar datos que no contengan "DEND" ni "DSTD"
-    hoja_o = certificado_df[certificado_df['Unnamed: 0'].str.contains('DEND|DSTD', na=False) == False]
-    hoja_o = hoja_o[['Holeid', 'From', 'To', 'Sample number', 'Displaced volume (g)', 'Wet weight (g)',
-                     'Dry weight (g)', 'Coated dry weight (g)', 'Weight in water (g)', 'Coated weight in water (g)',
+    hoja_o = certificado_df[certificado_df['Hole_Number'].str.contains('DEND|DSTD', na=False) == False]
+    hoja_o = hoja_o[['Hole_Number', 'Depth_From', 'Depth_To', 'Sample', 'Displaced Volume(g)', 'Wet Weight (g)',
+                     'Dry Weight (g)', 'Coated Dry Weight (g)', 'Weight in water (g)', 'Coated weight in water (g)',
                      'Coat density', 'moisture', 'Determination method', 'Laboratory', 'Date', 'Responsible', 'comments']]
     hoja_o.columns = ['Holeid', 'From', 'To', 'Sample number', 'Displaced volume (g)', 'Wet weight (g)', 'Dry weight (g)',
                       'Coated dry weight (g)', 'Weight in water (g)', 'Coated weight in water (g)', 'Coat density',
@@ -19,10 +19,10 @@ def process_data(certificado_df, plantilla_df):
     plantilla_df['O'] = hoja_o
     
     # Hoja "DP" - Filtrar y copiar datos que contengan "DEND"
-    hoja_dp = certificado_df[certificado_df['Unnamed: 0'].str.contains('DEND', na=False)]
-    hoja_dp = hoja_dp[['hole_number', 'depth_from', 'depth_to', 'sample', 'displaced_volume_g_D', 'dry_weight_g_D',
-                       'coated_dry_weight_g_D', 'weight_water_g', 'coated_wght_water_g', 'coat_density', 'QC_type',
-                       'determination_method', 'density_date', 'responsible', 'comments']]
+    hoja_dp = certificado_df[certificado_df['Hole_Number'].str.contains('DEND', na=False)]
+    hoja_dp = hoja_dp[['Hole_Number', 'Depth_From', 'Depth_To', 'Sample', 'Displaced Volume(g)', 'Dry Weight (g)',
+                       'Coated Dry Weight (g)', 'Weight in water (g)', 'Coated weight in water (g)', 'Coat density', 
+                       'QC_type', 'Determination method', 'Density date', 'Responsible', 'comments']]
     hoja_dp.columns = ['hole_number', 'depth_from', 'depth_to', 'sample', 'displaced_volume_g_D', 'dry_weight_g_D',
                        'coated_dry_weight_g_D', 'weight_water_g', 'coated_wght_water_g', 'coat_density', 'QC_type',
                        'determination_method', 'density_date', 'responsible', 'comments']
@@ -30,10 +30,10 @@ def process_data(certificado_df, plantilla_df):
     plantilla_df['DP'] = hoja_dp
     
     # Hoja "STD" - Filtrar y copiar datos que contengan "DSTD"
-    hoja_std = certificado_df[certificado_df['Unnamed: 0'].str.contains('DSTD', na=False)]
-    hoja_std = hoja_std[['hole_number', 'displaced_volume_g', 'dry_weight_g', 'coated_dry_weight_g', 'weight_water_g',
-                         'coated_wght_water_g', 'coat_density', 'DSTD_id', 'determination_method', 'density_date',
-                         'responsible', 'comments']]
+    hoja_std = certificado_df[certificado_df['Hole_Number'].str.contains('DSTD', na=False)]
+    hoja_std = hoja_std[['Hole_Number', 'Displaced Volume(g)', 'Dry Weight (g)', 'Coated Dry Weight (g)', 'Weight in water (g)',
+                         'Coated weight in water (g)', 'Coat density', 'DSTD_id', 'Determination method', 'Density date',
+                         'Responsible', 'comments']]
     hoja_std.columns = ['hole_number', 'displaced_volume_g', 'dry_weight_g', 'coated_dry_weight_g', 'weight_water_g',
                         'coated_wght_water_g', 'coat_density', 'DSTD_id', 'determination_method', 'density_date',
                         'responsible', 'comments']
@@ -57,7 +57,7 @@ if certificado_file:
     certificado_df = pd.read_excel(certificado_file, sheet_name='PECLD07826', skiprows=26)  # Fila 27 es la 26 en 0-indexed
     
     # Cargar la plantilla desde el archivo PLANTILLA_EXPORT.xlsx (se asume que está en el mismo directorio que index.py)
-    plantilla_file = "PLANTILA_EXPORT.xlsx"
+    plantilla_file = "PLANTILLA_EXPORT.xlsx"
     plantilla_df = pd.read_excel(plantilla_file, sheet_name=None)  # Cargar todas las hojas de la plantilla
 
     # Procesar los datos y copiarlos a la plantilla
