@@ -4,7 +4,7 @@ from io import BytesIO
 
 # Cargar el archivo certificado.xlsx
 def load_data(file_path):
-    return pd.read_excel(file_path, sheet_name=0, header=None, skiprows=26, usecols="A:R", nrows=101)
+    return pd.read_excel(file_path, sheet_name=0, header=None, skiprows=27, usecols="A:R", nrows=101)
 
 # Función para eliminar "hola" y la fila 2 de la hoja "O"
 def clean_data(df, sheet_name):
