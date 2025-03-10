@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import openpyxl
-import requests
 from io import BytesIO
 
 # Función para cargar el archivo certificado
@@ -12,15 +11,12 @@ def cargar_certificado(file):
     return df
 
 # Función para cargar la plantilla desde GitHub
-def cargar_plantilla_github():
-    url = "https://github.com/tu_usuario/tu_repositorio/raw/main/plantilla_export.xlsx"
-    response = requests.get(url)
-    if response.status_code == 200:
-        plantilla = openpyxl.load_workbook(BytesIO(response.content))
-        return plantilla
-    else:
-        st.error("No se pudo cargar el archivo plantilla_export.xlsx desde GitHub.")
-        return None
+def cargar_plantilla():
+    # Cargar el archivo plantilla_export.xlsx directamente desde GitHub
+    url = "https://raw.githubusercontent.com/tu_usuario/tu_repositorio/main/plantilla_export.xlsx"
+    response = BytesIO(requests.get(url).content)
+    plantilla = openpyxl.load_workbook(response)
+    return plantilla
 
 # Función para aplicar filtros y copiar los datos filtrados a la plantilla
 def procesar_datos(certificado, plantilla):
@@ -65,7 +61,7 @@ uploaded_file = st.file_uploader("Sube el archivo certificado.xlsx", type=["xlsx
 if uploaded_file is not None:
     # Cargar y procesar el archivo certificado
     certificado = cargar_certificado(uploaded_file)
-    plantilla = cargar_plantilla_github()
+    plantilla = cargar_plantilla()
 
     if plantilla:
         # Procesar datos y copiarlos a la plantilla
