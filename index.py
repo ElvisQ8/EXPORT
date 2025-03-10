@@ -1,81 +1,85 @@
 import streamlit as st
 import pandas as pd
-import openpyxl
-from io import BytesIO
 
-# Cargar el archivo PLANTILLA_EXPORT.xlsx desde GitHub
-def load_template():
-    template_path = "PLANTILA_EXPORT.xlsx"  # Reemplazar con la URL en GitHub si necesario
-    with open(template_path, "rb") as f:
-        return BytesIO(f.read())
+# Función para cargar el archivo Excel
+def load_excel(file):
+    return pd.read_excel(file, sheet_name=None)
 
-# Función para procesar los datos
-def process_file(uploaded_file, template):
-    df_certificado = pd.read_excel(uploaded_file, sheet_name=0)
+# Función para filtrar y copiar los datos en la plantilla
+def process_data(certificado_df, plantilla_path):
+    # Cargar la plantilla de Excel
+    plantilla = pd.read_excel(plantilla_path, sheet_name=None)
     
-    # Filtrar datos según las condiciones
-    df_o = df_certificado[~df_certificado.iloc[:, 14].astype(str).isin(["DEND", "DSTD"])]
-    df_dp = df_certificado[df_certificado.iloc[:, 14].astype(str) == "DEND"]
-    df_std = df_certificado[df_certificado.iloc[:, 14].astype(str) == "DSTD"]
-    
-    # Cargar la plantilla
-    wb = openpyxl.load_workbook(template)
-    
-    # Procesar hoja "O"
-    sheet_o = wb["O"]
-    data_o = df_o.iloc[:, [0,1,2,3,4,5,6,7,8,9,10,11,12,15,16]].values.tolist()
-    for i, row in enumerate(data_o, start=27):
-        for j, value in enumerate(row, start=1):
-            sheet_o.cell(row=i, column=j, value=value)
-    
-    # Procesar hoja "DP"
-    sheet_dp = wb["DP"]
-    data_dp = df_dp.iloc[:, [0,1,2,3,4,6,7,8,9,10,13,12,15,16]].values.tolist()
-    for i, row in enumerate(data_dp, start=27):
-        for j, value in enumerate(row, start=1):
-            sheet_dp.cell(row=i, column=j, value=value)
-    
-    # Procesar hoja "STD"
-    sheet_std = wb["STD"]
-    data_std = df_std.iloc[:, [0,4,6,7,8,9,10,13,12,15,16]].values.tolist()
-    for i, row in enumerate(data_std, start=27):
-        for j, value in enumerate(row, start=1):
-            sheet_std.cell(row=i, column=j, value=value)
-    
-    return wb
+    # Hoja "O" - Filtrar y copiar datos que no contengan "DEND" ni "DSTD"
+    hoja_o = certificado_df[certificado_df['Unnamed: 0'].str.contains('DEND|DSTD', na=False) == False]
+    hoja_o = hoja_o[['Holeid', 'From', 'To', 'Sample number', 'Displaced volume (g)', 'Wet weight (g)',
+                     'Dry weight (g)', 'Coated dry weight (g)', 'Weight in water (g)', 'Coated weight in water (g)',
+                     'Coat density', 'moisture', 'Determination method', 'Laboratory', 'Date', 'Responsible', 'comments']]
+    hoja_o.columns = ['Holeid', 'From', 'To', 'Sample number', 'Displaced volume (g)', 'Wet weight (g)', 'Dry weight (g)',
+                      'Coated dry weight (g)', 'Weight in water (g)', 'Coated weight in water (g)', 'Coat density',
+                      'moisture', 'Determination method', 'Laboratory', 'Date', 'Responsible', 'comments']
 
-# Función para descargar una hoja
-def download_sheet(workbook, sheet_name):
-    output = BytesIO()
-    wb_copy = openpyxl.Workbook()
-    sheet_copy = wb_copy.active
-    sheet_copy.title = sheet_name
-    source_sheet = workbook[sheet_name]
+    plantilla['O'] = hoja_o
     
-    for row in source_sheet.iter_rows():
-        sheet_copy.append([cell.value for cell in row])
+    # Hoja "DP" - Filtrar y copiar datos que contengan "DEND"
+    hoja_dp = certificado_df[certificado_df['Unnamed: 0'].str.contains('DEND', na=False)]
+    hoja_dp = hoja_dp[['hole_number', 'depth_from', 'depth_to', 'sample', 'displaced_volume_g_D', 'dry_weight_g_D',
+                       'coated_dry_weight_g_D', 'weight_water_g', 'coated_wght_water_g', 'coat_density', 'QC_type',
+                       'determination_method', 'density_date', 'responsible', 'comments']]
+    hoja_dp.columns = ['hole_number', 'depth_from', 'depth_to', 'sample', 'displaced_volume_g_D', 'dry_weight_g_D',
+                       'coated_dry_weight_g_D', 'weight_water_g', 'coated_wght_water_g', 'coat_density', 'QC_type',
+                       'determination_method', 'density_date', 'responsible', 'comments']
+
+    plantilla['DP'] = hoja_dp
     
-    wb_copy.save(output)
-    output.seek(0)
-    return output
+    # Hoja "STD" - Filtrar y copiar datos que contengan "DSTD"
+    hoja_std = certificado_df[certificado_df['Unnamed: 0'].str.contains('DSTD', na=False)]
+    hoja_std = hoja_std[['hole_number', 'displaced_volume_g', 'dry_weight_g', 'coated_dry_weight_g', 'weight_water_g',
+                         'coated_wght_water_g', 'coat_density', 'DSTD_id', 'determination_method', 'density_date',
+                         'responsible', 'comments']]
+    hoja_std.columns = ['hole_number', 'displaced_volume_g', 'dry_weight_g', 'coated_dry_weight_g', 'weight_water_g',
+                        'coated_wght_water_g', 'coat_density', 'DSTD_id', 'determination_method', 'density_date',
+                        'responsible', 'comments']
+
+    plantilla['STD'] = hoja_std
+    
+    return plantilla
+
+# Función para exportar a CSV
+def export_to_csv(sheet, filename):
+    sheet.to_csv(filename, index=False)
 
 # Interfaz Streamlit
-st.title("Procesamiento de Certificados")
-uploaded_file = st.file_uploader("Sube el archivo certificado.xlsx", type=["xlsx"])
+st.title("Procesador de Datos Excel")
 
-template = load_template()
-if uploaded_file:
-    wb_processed = process_file(uploaded_file, template)
-    
-    st.success("Datos procesados correctamente.")
-    
-    for sheet in ["O", "DP", "STD"]:
-        output = download_sheet(wb_processed, sheet)
-        st.download_button(
-            label=f"Descargar hoja {sheet}",
-            data=output,
-            file_name=f"{sheet}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+# Cargar el archivo "certificado.xlsx"
+certificado_file = st.file_uploader("Cargar archivo certificado.xlsx", type=["xlsx"])
 
+if certificado_file:
+    # Cargar los datos
+    certificado_df = pd.read_excel(certificado_file, sheet_name='PECLD07826', skiprows=26)  # Fila 27 es la 26 en 0-indexed
 
+    # Cargar plantilla de Excel
+    plantilla_file = "PLANTILLA_EXPORT.xlsx"  # Se asume que la plantilla está en el mismo directorio
+
+    # Procesar los datos y copiarlos a la plantilla
+    plantilla = process_data(certificado_df, plantilla_file)
+
+    # Mostrar vista previa de las hojas procesadas
+    st.subheader("Vista previa de los datos procesados")
+    st.write(plantilla['O'].head())  # Muestra las primeras filas de la hoja "O"
+    st.write(plantilla['DP'].head())  # Muestra las primeras filas de la hoja "DP"
+    st.write(plantilla['STD'].head())  # Muestra las primeras filas de la hoja "STD"
+
+    # Botones para exportar a CSV
+    if st.button('Exportar hoja O a CSV'):
+        export_to_csv(plantilla['O'], "hoja_O.csv")
+        st.success("Hoja 'O' exportada como CSV")
+
+    if st.button('Exportar hoja DP a CSV'):
+        export_to_csv(plantilla['DP'], "hoja_DP.csv")
+        st.success("Hoja 'DP' exportada como CSV")
+
+    if st.button('Exportar hoja STD a CSV'):
+        export_to_csv(plantilla['STD'], "hoja_STD.csv")
+        st.success("Hoja 'STD' exportada como CSV")
