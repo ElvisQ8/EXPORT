@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import openpyxl
+import io
 
 # Ruta local del archivo plantilla
 PLANTILLA_PATH = "plantilla_export.xlsx"
@@ -60,8 +61,8 @@ def procesar_datos(certificado, plantilla):
     # Guardar la plantilla con los nuevos datos
     plantilla.save("plantilla_export_modificada.xlsx")
 
-# Función para exportar una hoja a CSV
-def exportar_csv(hoja_nombre, plantilla):
+# Función para generar y permitir la descarga de una hoja a CSV
+def generar_csv(hoja_nombre, plantilla):
     hoja = plantilla[hoja_nombre]
     
     # Convertir la hoja en un DataFrame
@@ -70,8 +71,12 @@ def exportar_csv(hoja_nombre, plantilla):
     # Eliminar las palabras "HOLA" de los datos antes de exportar
     df = df.replace("HOLA", "")
     
-    # Exportar el DataFrame a CSV
-    df.to_csv(f"{hoja_nombre}.csv", index=False)
+    # Convertir el DataFrame a un archivo CSV en memoria
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer, index=False)
+    csv_buffer.seek(0)
+    
+    return csv_buffer
 
 # Interfaz de usuario en Streamlit
 st.title("Procesar Certificado y Exportar Datos")
@@ -92,13 +97,13 @@ if uploaded_file is not None:
     
         # Generar botones para exportar a CSV
         if st.button('Exportar hoja O a CSV'):
-            exportar_csv('O', plantilla)
-            st.success("Hoja 'O' exportada a CSV.")
+            csv_o = generar_csv('O', plantilla)
+            st.download_button('Descargar CSV de hoja O', csv_o, file_name="hoja_O.csv", mime='text/csv')
     
         if st.button('Exportar hoja DP a CSV'):
-            exportar_csv('DP', plantilla)
-            st.success("Hoja 'DP' exportada a CSV.")
+            csv_dp = generar_csv('DP', plantilla)
+            st.download_button('Descargar CSV de hoja DP', csv_dp, file_name="hoja_DP.csv", mime='text/csv')
     
         if st.button('Exportar hoja STD a CSV'):
-            exportar_csv('STD', plantilla)
-            st.success("Hoja 'STD' exportada a CSV.")
+            csv_std = generar_csv('STD', plantilla)
+            st.download_button('Descargar CSV de hoja STD', csv_std, file_name="hoja_STD.csv", mime='text/csv')
