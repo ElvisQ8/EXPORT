@@ -1,57 +1,73 @@
 import streamlit as st
 import pandas as pd
 import openpyxl
-from io import BytesIO
 
-# Configuración de la página
-st.set_page_config(page_title='Procesador de Excel', layout='centered')
-st.title('Carga y Procesamiento de Datos en Excel')
+# Función para cargar el archivo certificado
+def cargar_certificado(file):
+    return pd.read_excel(file, sheet_name=0, header=25)
 
-# Cargar el archivo Excel desde el usuario
-uploaded_file = st.file_uploader("Sube tu archivo .xlsx", type=["xlsx"])
+# Función para cargar la plantilla
+def cargar_plantilla():
+    return openpyxl.load_workbook("plantilla_export.xlsx")
 
-if uploaded_file:
-    # Leer el archivo Excel tomando la fila 25 como encabezado
-    df = pd.read_excel(uploaded_file, sheet_name=0, header=25)
-    st.write("Vista previa de los datos cargados:")
-    st.dataframe(df)
+# Función para procesar y copiar los datos filtrados en la plantilla
+def procesar_datos(certificado, plantilla):
+    hoja_o = plantilla["O"]
+    hoja_dp = plantilla["DP"]
+    hoja_std = plantilla["STD"]
     
-    # Mostrar nombres de columnas para depuración
-    st.write("Nombres de columnas detectados en el archivo:")
-    st.write(df.columns.tolist())
-    
-    # Verificar si las columnas existen antes de seleccionarlas
-    expected_columns_O = ["Holeid", "From", "To", "Sample number", "Displaced volume (g)", "Wet weight (g)", 
-                          "Dry weight (g)", "Coated dry weight (g)", "Weight in water (g)", "Coated weight in water (g)", 
-                          "Coat density", "moisture", "Determination method", "Date", "comments"]
-    expected_columns_DP = ["hole_number", "depth_from", "depth_to", "sample", "displaced_volume_g_D", "dry_weight_g_D", 
-                           "coated_dry_weight_g_D", "weight_water_g", "coated_wght_water_g", "coat_density", "QC_type", 
-                           "determination_method", "density_date", "comments"]
-    expected_columns_STD = ["hole_number", "displaced_volume_g", "dry_weight_g", "coated_dry_weight_g", "weight_water_g", 
-                            "coated_wght_water_g", "coat_density", "DSTD_id", "determination_method", "density_date", "comments"]
-    
-    available_columns = df.columns.tolist()
-    df_O = df[~df.iloc[:, 14].astype(str).str.contains("DEND|DSTD", na=False)][[col for col in expected_columns_O if col in available_columns]]
-    df_DP = df[df.iloc[:, 14].astype(str).str.contains("DEND", na=False)][[col for col in expected_columns_DP if col in available_columns]]
-    df_STD = df[df.iloc[:, 14].astype(str).str.contains("DSTD", na=False)][[col for col in expected_columns_STD if col in available_columns]]
-    
-    # Función para exportar los datos como CSV
-    def export_csv(dataframe, filename):
-        output = BytesIO()
-        dataframe.to_csv(output, index=False, encoding='utf-8')
-        output.seek(0)
-        return output
-    
-    # Botones para descargar cada archivo filtrado
-    st.write("Descarga de archivos procesados:")
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.download_button("Descargar O.csv", data=export_csv(df_O, "O.csv"), file_name="O.csv", mime="text/csv")
-    with col2:
-        st.download_button("Descargar DP.csv", data=export_csv(df_DP, "DP.csv"), file_name="DP.csv", mime="text/csv")
-    with col3:
-        st.download_button("Descargar STD.csv", data=export_csv(df_STD, "STD.csv"), file_name="STD.csv", mime="text/csv")
+    # Filtro para la hoja "O" (sin "DEND" ni "DSTD")
+    datos_o = certificado[~certificado['O'].str.contains('DEND|DSTD', na=False)]
+    for i, row in datos_o.iterrows():
+        hoja_o.append([row['A'], row['B'], row['C'], row['D'], row['E'], row['F'], row['G'], row['H'],
+                       row['I'], row['J'], row['K'], row['L'], row['N'], None, row['Q'], None, row['R']])
 
-st.write("Sube tu archivo y procesa los datos automáticamente.")
+    # Filtro para la hoja "DP" (con "DEND")
+    datos_dp = certificado[certificado['O'].str.contains('DEND', na=False)]
+    for i, row in datos_dp.iterrows():
+        hoja_dp.append([row['A'], row['B'], row['C'], row['D'], row['E'], row['F'], row['G'], row['H'],
+                       row['I'], row['J'], row['K'], row['O'], row['N'], row['Q'], None, row['R']])
 
+    # Filtro para la hoja "STD" (con "DSTD")
+    datos_std = certificado[certificado['O'].str.contains('DSTD', na=False)]
+    for i, row in datos_std.iterrows():
+        hoja_std.append([row['A'], row['E'], row['G'], row['H'], row['I'], row['J'], row['K'], row['PECLSTDEN02'],
+                        row['N'], row['Q'], None, row['R']])
+
+    # Guardar la plantilla con los nuevos datos
+    plantilla.save("plantilla_export_modificada.xlsx")
+
+# Función para exportar una hoja a CSV
+def exportar_csv(hoja_nombre, plantilla):
+    hoja = plantilla[hoja_nombre]
+    df = pd.DataFrame(hoja.values)
+    df.to_csv(f"{hoja_nombre}.csv", index=False)
+
+# Interfaz de usuario en Streamlit
+st.title("Procesar Certificado y Exportar Datos")
+
+# Subir archivo certificado
+uploaded_file = st.file_uploader("Sube el archivo certificado.xlsx", type=["xlsx"])
+
+if uploaded_file is not None:
+    # Cargar y procesar el archivo certificado
+    certificado = cargar_certificado(uploaded_file)
+    plantilla = cargar_plantilla()
+
+    # Procesar datos y copiarlos a la plantilla
+    procesar_datos(certificado, plantilla)
+    
+    st.success("Los datos han sido procesados y copiados exitosamente.")
+    
+    # Generar botones para exportar a CSV
+    if st.button('Exportar hoja O a CSV'):
+        exportar_csv('O', plantilla)
+        st.success("Hoja 'O' exportada a CSV.")
+    
+    if st.button('Exportar hoja DP a CSV'):
+        exportar_csv('DP', plantilla)
+        st.success("Hoja 'DP' exportada a CSV.")
+    
+    if st.button('Exportar hoja STD a CSV'):
+        exportar_csv('STD', plantilla)
+        st.success("Hoja 'STD' exportada a CSV.")
