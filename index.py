@@ -35,23 +35,27 @@ def procesar_datos(certificado, plantilla):
     # Rellenar los valores vacíos con la palabra "HOLA"
     certificado.fillna("HOLA", inplace=True)
 
-    # Filtrar para la hoja "O" (sin "DEND" ni "DSTD")
-    datos_o = certificado[~certificado.iloc[:, 14].str.contains('DEND|DSTD', na=False)]  # Usar columna 15 (índice 14)
+    # Verificar los nombres de las columnas
+    st.write("Columnas del DataFrame procesado:")
+    st.write(certificado.columns)
+
+    # Filtrar para la hoja "O" (sin "DEND" ni "DSTD") usando los índices
+    datos_o = certificado[~certificado.iloc[:, 14].str.contains('DEND|DSTD', na=False)]  # Columna 'O' es el índice 14
     for i, row in datos_o.iterrows():
-        hoja_o.append([row['A'], row['B'], row['C'], row['D'], row['E'], row['F'], row['G'], row['H'],
-                       row['I'], row['J'], row['K'], row['L'], row['N'], None, row['Q'], None, row['R']])
+        hoja_o.append([row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7],
+                       row.iloc[8], row.iloc[9], row.iloc[10], row.iloc[11], row.iloc[13], None, row.iloc[16], None, row.iloc[17]])
 
     # Filtrar para la hoja "DP" (con "DEND")
-    datos_dp = certificado[certificado.iloc[:, 14].str.contains('DEND', na=False)]  # Usar columna 15 (índice 14)
+    datos_dp = certificado[certificado.iloc[:, 14].str.contains('DEND', na=False)]  # Columna 'O' es el índice 14
     for i, row in datos_dp.iterrows():
-        hoja_dp.append([row['A'], row['B'], row['C'], row['D'], row['E'], row['F'], row['G'], row['H'],
-                       row['I'], row['J'], row['K'], row['O'], row['N'], row['Q'], None, row['R']])
+        hoja_dp.append([row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7],
+                       row.iloc[8], row.iloc[9], row.iloc[10], row.iloc[14], row.iloc[13], row.iloc[16], None, row.iloc[17]])
 
     # Filtrar para la hoja "STD" (con "DSTD")
-    datos_std = certificado[certificado.iloc[:, 14].str.contains('DSTD', na=False)]  # Usar columna 15 (índice 14)
+    datos_std = certificado[certificado.iloc[:, 14].str.contains('DSTD', na=False)]  # Columna 'O' es el índice 14
     for i, row in datos_std.iterrows():
-        hoja_std.append([row['A'], row['E'], row['G'], row['H'], row['I'], row['J'], row['K'], row['PECLSTDEN02'],
-                        row['N'], row['Q'], None, row['R']])
+        hoja_std.append([row.iloc[0], row.iloc[4], row.iloc[6], row.iloc[7], row.iloc[8], row.iloc[9], row.iloc[10], row.iloc[16],
+                         row.iloc[13], row.iloc[16], None, row.iloc[17]])
 
     # Guardar la plantilla con los nuevos datos
     plantilla.save("plantilla_export_modificada.xlsx")
