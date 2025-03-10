@@ -9,7 +9,13 @@ PLANTILLA_PATH = "plantilla_export.xlsx"
 def cargar_certificado(file):
     # Cargar los datos desde la fila 27 hasta la 127, considerando la fila 26 como cabecera
     df = pd.read_excel(file, sheet_name=0, header=25, skiprows=0, nrows=101)
-    st.write(df.head())  # Mostrar las primeras filas para verificar las columnas
+    
+    # Rellenar los valores vacíos con la palabra "HOLA"
+    df.fillna("HOLA", inplace=True)
+    
+    st.write("Columnas del archivo certificado:")
+    st.write(df.columns)  # Mostrar las columnas para verificar su nombre
+    st.write(df.head())  # Mostrar las primeras filas para verificar los datos
     return df
 
 # Función para cargar la plantilla desde la ruta local
@@ -52,7 +58,14 @@ def procesar_datos(certificado, plantilla):
 # Función para exportar una hoja a CSV
 def exportar_csv(hoja_nombre, plantilla):
     hoja = plantilla[hoja_nombre]
+    
+    # Convertir la hoja en un DataFrame
     df = pd.DataFrame(hoja.values)
+    
+    # Eliminar las palabras "HOLA" de los datos antes de exportar
+    df = df.replace("HOLA", "")
+    
+    # Exportar el DataFrame a CSV
     df.to_csv(f"{hoja_nombre}.csv", index=False)
 
 # Interfaz de usuario en Streamlit
