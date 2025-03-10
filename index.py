@@ -1,16 +1,26 @@
 import streamlit as st
 import pandas as pd
 import openpyxl
+import requests
+from io import BytesIO
 
 # Función para cargar el archivo certificado
 def cargar_certificado(file):
     # Cargar los datos desde la fila 27 hasta la 127, considerando la fila 26 como cabecera
     df = pd.read_excel(file, sheet_name=0, header=25, skiprows=0, nrows=101)
+    st.write(df.head())  # Mostrar las primeras filas para verificar las columnas
     return df
 
-# Función para cargar la plantilla
-def cargar_plantilla():
-    return openpyxl.load_workbook("plantilla_export.xlsx")
+# Función para cargar la plantilla desde GitHub
+def cargar_plantilla_github():
+    url = "https://github.com/tu_usuario/tu_repositorio/raw/main/plantilla_export.xlsx"
+    response = requests.get(url)
+    if response.status_code == 200:
+        plantilla = openpyxl.load_workbook(BytesIO(response.content))
+        return plantilla
+    else:
+        st.error("No se pudo cargar el archivo plantilla_export.xlsx desde GitHub.")
+        return None
 
 # Función para aplicar filtros y copiar los datos filtrados a la plantilla
 def procesar_datos(certificado, plantilla):
@@ -55,22 +65,23 @@ uploaded_file = st.file_uploader("Sube el archivo certificado.xlsx", type=["xlsx
 if uploaded_file is not None:
     # Cargar y procesar el archivo certificado
     certificado = cargar_certificado(uploaded_file)
-    plantilla = cargar_plantilla()
+    plantilla = cargar_plantilla_github()
 
-    # Procesar datos y copiarlos a la plantilla
-    procesar_datos(certificado, plantilla)
+    if plantilla:
+        # Procesar datos y copiarlos a la plantilla
+        procesar_datos(certificado, plantilla)
     
-    st.success("Los datos han sido procesados y copiados exitosamente.")
+        st.success("Los datos han sido procesados y copiados exitosamente.")
     
-    # Generar botones para exportar a CSV
-    if st.button('Exportar hoja O a CSV'):
-        exportar_csv('O', plantilla)
-        st.success("Hoja 'O' exportada a CSV.")
+        # Generar botones para exportar a CSV
+        if st.button('Exportar hoja O a CSV'):
+            exportar_csv('O', plantilla)
+            st.success("Hoja 'O' exportada a CSV.")
     
-    if st.button('Exportar hoja DP a CSV'):
-        exportar_csv('DP', plantilla)
-        st.success("Hoja 'DP' exportada a CSV.")
+        if st.button('Exportar hoja DP a CSV'):
+            exportar_csv('DP', plantilla)
+            st.success("Hoja 'DP' exportada a CSV.")
     
-    if st.button('Exportar hoja STD a CSV'):
-        exportar_csv('STD', plantilla)
-        st.success("Hoja 'STD' exportada a CSV.")
+        if st.button('Exportar hoja STD a CSV'):
+            exportar_csv('STD', plantilla)
+            st.success("Hoja 'STD' exportada a CSV.")
