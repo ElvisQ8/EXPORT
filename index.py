@@ -36,25 +36,24 @@ st.title("Procesador de Certificados")
 certificado_file = st.file_uploader("Sube el archivo certificado.xlsx", type=["xlsx"])
 
 if certificado_file:
-    certificado_df = pd.read_excel(certificado_file, sheet_name=None)
+    certificado_df = pd.read_excel(certificado_file, sheet_name=None, engine='openpyxl')
     hoja_certificado = list(certificado_df.keys())[0]  # Tomar la primera hoja
     certificado_df = certificado_df[hoja_certificado].iloc[27:]
     
-    plantilla = pd.ExcelFile(PLANTILLA_PATH)
+    plantilla = pd.ExcelFile(PLANTILLA_PATH, engine='openpyxl')
     
     hojas = ["O", "DP", "STD"]
     
     for hoja in hojas:
         df_filtrado = filtrar_y_copiar_datos(certificado_df, hoja)
         
-        if df_filtrado is not None:
+        if df_filtrado is not None and not df_filtrado.empty:
             st.write(f"Vista previa de la hoja {hoja}:")
             st.dataframe(df_filtrado)
             
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
                 df_filtrado.to_excel(writer, sheet_name=hoja, index=False)
-
             
             st.download_button(
                 label=f"Descargar {hoja}.xlsx",
