@@ -6,7 +6,7 @@ from io import BytesIO
 def load_data(file_path):
     return pd.read_excel(file_path, sheet_name=0, header=None, skiprows=27, usecols="A:R", nrows=101)
 
-# Función para eliminar "hola" de las columnas
+# Función para eliminar "hola" y la fila 2 de la hoja "O"
 def clean_data(df, sheet_name):
     df_cleaned = df[df != 'hola']
     return df_cleaned
@@ -33,33 +33,53 @@ def copy_data_to_template(df, sheet_name, selected_name, template_file):
             elif sheet_name == "STD":
                 df_filtered = df[df[14].str.contains('DSTD', na=False)]
                 df_filtered[13] = selected_name  # Colocar el nombre en la columna "K" de la hoja "STD"
-            
-            # Definir el mapeo de columnas que vamos a copiar de los datos a las columnas de la plantilla
-            column_mapping = {
-                "O": {
-                    0: "A", 1: "B", 2: "C", 3: "D", 4: "E", 5: "F", 6: "G", 7: "H",
-                    8: "I", 9: "J", 10: "K", 11: "L", 13: "M", 16: "O", 17: "Q"
-                },
-                "DP": {
-                    0: "A", 1: "B", 2: "C", 3: "D", 4: "E", 6: "F", 7: "G", 8: "H",
-                    9: "I", 10: "J", 14: "K", 13: "L", 16: "M", 17: "O"
-                },
-                "STD": {
-                    0: "A", 4: "B", 6: "C", 7: "D", 8: "E", 9: "F", 10: "G", "PECLSTDEN02": "H",
-                    13: "I", 16: "J", 17: "L"
-                }
-            }
 
-            # Copiar los datos de acuerdo con el mapeo de columnas
-            for i, col in enumerate(df_filtered.columns):
-                if i in column_mapping[sheet_name]:
-                    # Obtener la columna de la plantilla que corresponde a la columna del DataFrame
-                    col_letter = column_mapping[sheet_name][i]
-                    # Escribir los datos de la columna en la columna correspondiente de la hoja de plantilla
-                    col_data = df_filtered[col].values
-                    # Convertir las columnas a las celdas correspondientes en el archivo Excel
-                    for row_idx, value in enumerate(col_data, start=2):  # Comenzamos desde la fila 2
-                        writer.sheets[sheet_name].write(f'{col_letter}{row_idx}', value)
+            # Mapeo de columnas para la hoja "O"
+            if sheet_name == "O":
+                # Mapeo columna por columna de acuerdo con las instrucciones
+                writer.sheets[sheet_name].write_column('B2', df_filtered[0].values)  # Columna 0 -> Columna B
+                writer.sheets[sheet_name].write_column('C2', df_filtered[1].values)  # Columna 1 -> Columna C
+                writer.sheets[sheet_name].write_column('D2', df_filtered[2].values)  # Columna 2 -> Columna D
+                writer.sheets[sheet_name].write_column('E2', df_filtered[3].values)  # Columna 3 -> Columna E
+                writer.sheets[sheet_name].write_column('F2', df_filtered[4].values)  # Columna 4 -> Columna F
+                writer.sheets[sheet_name].write_column('G2', df_filtered[5].values)  # Columna 5 -> Columna G
+                writer.sheets[sheet_name].write_column('H2', df_filtered[6].values)  # Columna 6 -> Columna H
+                writer.sheets[sheet_name].write_column('I2', df_filtered[7].values)  # Columna 7 -> Columna I
+                writer.sheets[sheet_name].write_column('J2', df_filtered[8].values)  # Columna 8 -> Columna J
+                writer.sheets[sheet_name].write_column('K2', df_filtered[9].values)  # Columna 9 -> Columna K
+                writer.sheets[sheet_name].write_column('L2', df_filtered[10].values)  # Columna 10 -> Columna L
+                writer.sheets[sheet_name].write_column('M2', df_filtered[11].values)  # Columna 11 -> Columna M
+                writer.sheets[sheet_name].write_column('O2', df_filtered[13].values)  # Columna 13 -> Columna O
+                writer.sheets[sheet_name].write_column('Q2', df_filtered[16].values)  # Columna 16 -> Columna Q
+
+            # Mapeo para la hoja "DP"
+            elif sheet_name == "DP":
+                writer.sheets[sheet_name].write_column('B2', df_filtered[0].values)  # Columna 0 -> Columna B
+                writer.sheets[sheet_name].write_column('C2', df_filtered[1].values)  # Columna 1 -> Columna C
+                writer.sheets[sheet_name].write_column('D2', df_filtered[2].values)  # Columna 2 -> Columna D
+                writer.sheets[sheet_name].write_column('E2', df_filtered[3].values)  # Columna 3 -> Columna E
+                writer.sheets[sheet_name].write_column('F2', df_filtered[6].values)  # Columna 6 -> Columna F
+                writer.sheets[sheet_name].write_column('G2', df_filtered[7].values)  # Columna 7 -> Columna G
+                writer.sheets[sheet_name].write_column('H2', df_filtered[8].values)  # Columna 8 -> Columna H
+                writer.sheets[sheet_name].write_column('I2', df_filtered[9].values)  # Columna 9 -> Columna I
+                writer.sheets[sheet_name].write_column('J2', df_filtered[10].values)  # Columna 10 -> Columna J
+                writer.sheets[sheet_name].write_column('K2', df_filtered[14].values)  # Columna 14 -> Columna K
+                writer.sheets[sheet_name].write_column('L2', df_filtered[13].values)  # Columna 13 -> Columna L
+                writer.sheets[sheet_name].write_column('M2', df_filtered[16].values)  # Columna 16 -> Columna M
+                writer.sheets[sheet_name].write_column('O2', df_filtered[17].values)  # Columna 17 -> Columna O
+
+            # Mapeo para la hoja "STD"
+            elif sheet_name == "STD":
+                writer.sheets[sheet_name].write_column('B2', df_filtered[0].values)  # Columna 0 -> Columna B
+                writer.sheets[sheet_name].write_column('C2', df_filtered[4].values)  # Columna 4 -> Columna C
+                writer.sheets[sheet_name].write_column('D2', df_filtered[6].values)  # Columna 6 -> Columna D
+                writer.sheets[sheet_name].write_column('E2', df_filtered[7].values)  # Columna 7 -> Columna E
+                writer.sheets[sheet_name].write_column('F2', df_filtered[8].values)  # Columna 8 -> Columna F
+                writer.sheets[sheet_name].write_column('G2', df_filtered[9].values)  # Columna 9 -> Columna G
+                writer.sheets[sheet_name].write_column('H2', df_filtered[10].values)  # Columna 10 -> Columna H
+                writer.sheets[sheet_name].write_column('I2', df_filtered[13].values)  # Columna 13 -> Columna I
+                writer.sheets[sheet_name].write_column('J2', df_filtered[16].values)  # Columna 16 -> Columna J
+                writer.sheets[sheet_name].write_column('L2', df_filtered[17].values)  # Columna 17 -> Columna L
 
         output.seek(0)  # Asegurarse de que el flujo esté al principio
         return output.getvalue()
