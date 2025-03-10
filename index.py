@@ -82,4 +82,5 @@ if uploaded_file is not None:
             st.success("Hoja 'DP' exportada a CSV.")
     
         if st.button('Exportar hoja STD a CSV'):
-            exportar_csv('STD', plantilla
+            exportar_csv('STD', plantilla)
+            st.success("Hoja 'STD' exportada a CSV.")
