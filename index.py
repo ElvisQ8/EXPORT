@@ -30,7 +30,7 @@ def copy_data_to_template(df, sheet_name, selected_name, template_file):
             df_filtered = df[df[14].str.contains('DSTD', na=False)]
             df_filtered[13] = selected_name  # Colocar el nombre en la columna "K" de la hoja "STD"
         
-        # Escribir los datos en formato CSV
+        # Escribir los datos en formato CSV sin incluir índices ni cabeceras adicionales
         df_filtered.to_csv(output, index=False, header=True)
 
         output.seek(0)  # Asegurarse de que el flujo esté al principio
@@ -62,12 +62,4 @@ if uploaded_file is not None:
 
     # Botón para exportar la hoja "DP"
     if st.button('Exportar Hoja DP'):
-        df_cleaned = clean_data(df, "DP")
-        file_dp = copy_data_to_template(df_cleaned, "DP", selected_name, template_file)
-        st.download_button("Descargar Hoja DP como CSV", data=file_dp, file_name="plantilla_DP.csv")
-
-    # Botón para exportar la hoja "STD"
-    if st.button('Exportar Hoja STD'):
-        df_cleaned = clean_data(df, "STD")
-        file_std = copy_data_to_template(df_cleaned, "STD", selected_name, template_file)
-        st.download_button("Descargar Hoja STD como CSV", data=file_std, file_name="plantilla_STD.csv")
+        df_clea
