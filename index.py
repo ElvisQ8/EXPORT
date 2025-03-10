@@ -32,7 +32,7 @@ def copy_data_to_template(df, sheet_name, selected_name):
     
     # Escribir los datos procesados en la hoja correspondiente del archivo Excel
     df_filtered.to_excel(writer, sheet_name=sheet_name, index=False)
-    writer.save()
+    writer.close()  # Usar 'close()' en vez de 'save()'
     return writer
 
 # Función para convertir el archivo en un archivo descargable
