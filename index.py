@@ -20,10 +20,10 @@ def copy_data_to_template(df, sheet_name, selected_name, template_file):
 
     with BytesIO() as output:
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            # Escribir todas las hojas de la plantilla original
-            for sheet in template.sheet_names:
-                temp_df = template.parse(sheet)
-                temp_df.to_excel(writer, sheet_name=sheet, index=False)
+            # Escribir solo la hoja seleccionada de la plantilla
+            if sheet_name in template.sheet_names:
+                temp_df = template.parse(sheet_name)
+                temp_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
             # Filtrar y copiar los datos en la hoja correspondiente
             if sheet_name == "O":
