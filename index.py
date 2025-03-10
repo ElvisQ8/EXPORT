@@ -33,8 +33,7 @@ def copy_data_to_template(df, sheet_name, selected_name):
             
             # Escribir los datos procesados en la hoja correspondiente
             df_filtered.to_excel(writer, sheet_name=sheet_name, index=False)
-            writer.save()
-
+        
         # Retornar el archivo Excel en formato BytesIO para ser descargado
         output.seek(0)
         return output
