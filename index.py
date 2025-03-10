@@ -36,7 +36,6 @@ def copy_data_to_template(df, sheet_name, selected_name, template_file):
 
             # Mapeo de columnas para la hoja "O"
             if sheet_name == "O":
-                # Convertir valores a texto y asegurar que no sean nulos o inválidos
                 writer.sheets[sheet_name].write_column('B2', df_filtered[0].fillna('').astype(str).values)  # Columna 0 -> Columna B
                 writer.sheets[sheet_name].write_column('C2', df_filtered[1].fillna('').astype(str).values)  # Columna 1 -> Columna C
                 writer.sheets[sheet_name].write_column('D2', df_filtered[2].fillna('').astype(str).values)  # Columna 2 -> Columna D
@@ -52,37 +51,13 @@ def copy_data_to_template(df, sheet_name, selected_name, template_file):
                 writer.sheets[sheet_name].write_column('O2', df_filtered[13].fillna('').astype(str).values)  # Columna 13 -> Columna O
                 writer.sheets[sheet_name].write_column('Q2', df_filtered[16].fillna('').astype(str).values)  # Columna 16 -> Columna Q
 
-            # Mapeo para la hoja "DP"
-            elif sheet_name == "DP":
-                writer.sheets[sheet_name].write_column('B2', df_filtered[0].fillna('').astype(str).values)  # Columna 0 -> Columna B
-                writer.sheets[sheet_name].write_column('C2', df_filtered[1].fillna('').astype(str).values)  # Columna 1 -> Columna C
-                writer.sheets[sheet_name].write_column('D2', df_filtered[2].fillna('').astype(str).values)  # Columna 2 -> Columna D
-                writer.sheets[sheet_name].write_column('E2', df_filtered[3].fillna('').astype(str).values)  # Columna 3 -> Columna E
-                writer.sheets[sheet_name].write_column('F2', df_filtered[6].fillna('').astype(str).values)  # Columna 6 -> Columna F
-                writer.sheets[sheet_name].write_column('G2', df_filtered[7].fillna('').astype(str).values)  # Columna 7 -> Columna G
-                writer.sheets[sheet_name].write_column('H2', df_filtered[8].fillna('').astype(str).values)  # Columna 8 -> Columna H
-                writer.sheets[sheet_name].write_column('I2', df_filtered[9].fillna('').astype(str).values)  # Columna 9 -> Columna I
-                writer.sheets[sheet_name].write_column('J2', df_filtered[10].fillna('').astype(str).values)  # Columna 10 -> Columna J
-                writer.sheets[sheet_name].write_column('K2', df_filtered[14].fillna('').astype(str).values)  # Columna 14 -> Columna K
-                writer.sheets[sheet_name].write_column('L2', df_filtered[13].fillna('').astype(str).values)  # Columna 13 -> Columna L
-                writer.sheets[sheet_name].write_column('M2', df_filtered[16].fillna('').astype(str).values)  # Columna 16 -> Columna M
-                writer.sheets[sheet_name].write_column('O2', df_filtered[17].fillna('').astype(str).values)  # Columna 17 -> Columna O
-
-            # Mapeo para la hoja "STD"
-            elif sheet_name == "STD":
-                writer.sheets[sheet_name].write_column('B2', df_filtered[0].fillna('').astype(str).values)  # Columna 0 -> Columna B
-                writer.sheets[sheet_name].write_column('C2', df_filtered[4].fillna('').astype(str).values)  # Columna 4 -> Columna C
-                writer.sheets[sheet_name].write_column('D2', df_filtered[6].fillna('').astype(str).values)  # Columna 6 -> Columna D
-                writer.sheets[sheet_name].write_column('E2', df_filtered[7].fillna('').astype(str).values)  # Columna 7 -> Columna E
-                writer.sheets[sheet_name].write_column('F2', df_filtered[8].fillna('').astype(str).values)  # Columna 8 -> Columna F
-                writer.sheets[sheet_name].write_column('G2', df_filtered[9].fillna('').astype(str).values)  # Columna 9 -> Columna G
-                writer.sheets[sheet_name].write_column('H2', df_filtered[10].fillna('').astype(str).values)  # Columna 10 -> Columna H
-                writer.sheets[sheet_name].write_column('I2', df_filtered[13].fillna('').astype(str).values)  # Columna 13 -> Columna I
-                writer.sheets[sheet_name].write_column('J2', df_filtered[16].fillna('').astype(str).values)  # Columna 16 -> Columna J
-                writer.sheets[sheet_name].write_column('L2', df_filtered[17].fillna('').astype(str).values)  # Columna 17 -> Columna L
-
+        # Convertir el archivo a CSV para la descarga
         output.seek(0)  # Asegurarse de que el flujo esté al principio
-        return output.getvalue()
+        df_csv = pd.read_excel(output, sheet_name=sheet_name)  # Leer el archivo modificado en el buffer
+        csv_output = BytesIO()
+        df_csv.to_csv(csv_output, index=False, sep=';', encoding='utf-8')  # Convertir a CSV
+        csv_output.seek(0)
+        return csv_output.getvalue()
 
 # Crear la interfaz de usuario
 st.title("Exportar Datos a Plantilla Excel")
@@ -106,16 +81,16 @@ if uploaded_file is not None:
     if st.button('Exportar Hoja O'):
         df_cleaned = clean_data(df, "O")
         file_o = copy_data_to_template(df_cleaned, "O", selected_name, template_file)
-        st.download_button("Descargar Hoja O", data=file_o, file_name="plantilla_O.xlsx")
+        st.download_button("Descargar Hoja O como CSV", data=file_o, file_name="plantilla_O.csv")
 
     # Botón para exportar la hoja "DP"
     if st.button('Exportar Hoja DP'):
         df_cleaned = clean_data(df, "DP")
         file_dp = copy_data_to_template(df_cleaned, "DP", selected_name, template_file)
-        st.download_button("Descargar Hoja DP", data=file_dp, file_name="plantilla_DP.xlsx")
+        st.download_button("Descargar Hoja DP como CSV", data=file_dp, file_name="plantilla_DP.csv")
 
     # Botón para exportar la hoja "STD"
     if st.button('Exportar Hoja STD'):
         df_cleaned = clean_data(df, "STD")
         file_std = copy_data_to_template(df_cleaned, "STD", selected_name, template_file)
-        st.download_button("Descargar Hoja STD", data=file_std, file_name="plantilla_STD.xlsx")
+        st.download_button("Descargar Hoja STD como CSV", data=file_std, file_name="plantilla_STD.csv")
