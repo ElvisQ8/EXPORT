@@ -9,8 +9,6 @@ def load_data(file_path):
 # Función para eliminar "hola" y la fila 2 de la hoja "O"
 def clean_data(df, sheet_name):
     df_cleaned = df[df != 'hola']
-    if sheet_name == "O":
-        df_cleaned = df_cleaned.drop(index=1)  # Eliminar la fila 2
     return df_cleaned
 
 # Función para copiar los datos según el mapeo y modificar la plantilla
