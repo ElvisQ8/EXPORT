@@ -54,3 +54,4 @@ if uploaded_file:
         st.download_button("Descargar STD.csv", data=export_csv(df_STD, "STD.csv"), file_name="STD.csv", mime="text/csv")
 
 st.write("Sube tu archivo y procesa los datos automáticamente.")
+
