@@ -1,109 +1,80 @@
-import streamlit as st
 import pandas as pd
-import openpyxl
-import io
+import streamlit as st
+from io import BytesIO
 
-# Ruta local del archivo plantilla
-PLANTILLA_PATH = "plantilla_export.xlsx"
+# Cargar el archivo certificado.xlsx
+def load_data(file_path):
+    return pd.read_excel(file_path, sheet_name=0, header=None, skiprows=26, usecols="A:R", nrows=101)
 
-# Función para cargar el archivo certificado
-def cargar_certificado(file):
-    # Cargar los datos desde la fila 27 hasta la 127, considerando la fila 26 como cabecera
-    df = pd.read_excel(file, sheet_name=0, header=25, skiprows=0, nrows=101)
+# Función para eliminar "hola" y la fila 2 de la hoja "O"
+def clean_data(df, sheet_name):
+    df_cleaned = df[df != 'hola']
+    if sheet_name == "O":
+        df_cleaned = df_cleaned.drop(index=1)  # Eliminar la fila 2
+    return df_cleaned
+
+# Función para copiar los datos según el mapeo
+def copy_data_to_template(df, sheet_name, selected_name):
+    # Crear un nuevo archivo Excel para almacenar los datos procesados
+    writer = pd.ExcelWriter(f'{sheet_name}_template.xlsx', engine='xlsxwriter')
+
+    if sheet_name == "O":
+        df_filtered = df[~df[14].str.contains('DSTD|DEND', na=False)]
+        df_filtered[13] = selected_name  # Colocar el nombre en la columna "N" de la hoja "O"
+
+    elif sheet_name == "DP":
+        df_filtered = df[df[14].str.contains('DEND', na=False)]
+        df_filtered[13] = selected_name  # Colocar el nombre en la columna "K" de la hoja "DP"
+
+    elif sheet_name == "STD":
+        df_filtered = df[df[14].str.contains('DSTD', na=False)]
+        df_filtered[13] = selected_name  # Colocar el nombre en la columna "K" de la hoja "STD"
     
-    # Verificar las columnas del DataFrame cargado
-    st.write("Columnas del archivo certificado:")
-    st.write(df.columns)  # Mostrar las columnas para verificar su nombre
-    st.write(df.head())  # Mostrar las primeras filas para verificar los datos
-    return df
+    # Escribir los datos procesados en la hoja correspondiente del archivo Excel
+    df_filtered.to_excel(writer, sheet_name=sheet_name, index=False)
+    writer.save()
+    return writer
 
-# Función para cargar la plantilla desde la ruta local
-def cargar_plantilla():
-    try:
-        plantilla = openpyxl.load_workbook(PLANTILLA_PATH)
-        return plantilla
-    except FileNotFoundError:
-        st.error(f"El archivo {PLANTILLA_PATH} no se encuentra en el directorio.")
-        return None
+# Función para convertir el archivo en un archivo descargable
+def to_downloadable_excel(writer):
+    # Convertir el archivo Excel en un archivo descargable
+    file = BytesIO()
+    writer.save(file)
+    file.seek(0)
+    return file
 
-# Función para aplicar filtros y copiar los datos filtrados a la plantilla
-def procesar_datos(certificado, plantilla):
-    # Filtrar y preparar los datos para las hojas correspondientes
-    hoja_o = plantilla["O"]
-    hoja_dp = plantilla["DP"]
-    hoja_std = plantilla["STD"]
-    
-    # Rellenar los valores vacíos con la palabra "HOLA"
-    certificado.fillna("HOLA", inplace=True)
+# Crear la interfaz de usuario
+st.title("Exportar Datos a Plantilla Excel")
+st.write("Selecciona el nombre a agregar a las columnas 'N' (hoja 'O') y 'K' (hoja 'STD'):")
 
-    # Verificar los nombres de las columnas
-    st.write("Columnas del DataFrame procesado:")
-    st.write(certificado.columns)
+# Selección del nombre
+names = ["nombre1", "nombre2", "nombre3"]
+selected_name = st.selectbox("Selecciona un nombre", names)
 
-    # Filtrar para la hoja "O" (sin "DEND" ni "DSTD") usando los índices
-    datos_o = certificado[~certificado.iloc[:, 14].str.contains('DEND|DSTD', na=False)]  # Columna 'O' es el índice 14
-    for i, row in datos_o.iterrows():
-        hoja_o.append([row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7],
-                       row.iloc[8], row.iloc[9], row.iloc[10], row.iloc[11], row.iloc[13], None, row.iloc[16], None, row.iloc[17]])
-
-    # Filtrar para la hoja "DP" (con "DEND")
-    datos_dp = certificado[certificado.iloc[:, 14].str.contains('DEND', na=False)]  # Columna 'O' es el índice 14
-    for i, row in datos_dp.iterrows():
-        hoja_dp.append([row.iloc[0], row.iloc[1], row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7],
-                       row.iloc[8], row.iloc[9], row.iloc[10], row.iloc[14], row.iloc[13], row.iloc[16], None, row.iloc[17]])
-
-    # Filtrar para la hoja "STD" (con "DSTD")
-    datos_std = certificado[certificado.iloc[:, 14].str.contains('DSTD', na=False)]  # Columna 'O' es el índice 14
-    for i, row in datos_std.iterrows():
-        hoja_std.append([row.iloc[0], row.iloc[4], row.iloc[6], row.iloc[7], row.iloc[8], row.iloc[9], row.iloc[10], row.iloc[16],
-                         row.iloc[13], row.iloc[16], None, row.iloc[17]])
-
-    # Guardar la plantilla con los nuevos datos
-    plantilla.save("plantilla_export_modificada.xlsx")
-
-# Función para generar y permitir la descarga de una hoja a CSV
-def generar_csv(hoja_nombre, plantilla):
-    hoja = plantilla[hoja_nombre]
-    
-    # Convertir la hoja en un DataFrame
-    df = pd.DataFrame(hoja.values)
-    
-    # Eliminar las palabras "HOLA" de los datos antes de exportar
-    df = df.replace("HOLA", "")
-    
-    # Convertir el DataFrame a un archivo CSV en memoria
-    csv_buffer = io.StringIO()
-    df.to_csv(csv_buffer, index=False)
-    csv_buffer.seek(0)
-    
-    return csv_buffer
-
-# Interfaz de usuario en Streamlit
-st.title("Procesar Certificado y Exportar Datos")
-
-# Subir archivo certificado
-uploaded_file = st.file_uploader("Sube el archivo certificado.xlsx", type=["xlsx"])
+# Cargar el archivo Excel subido por el usuario
+uploaded_file = st.file_uploader("Sube el archivo .xlsx", type=["xlsx"])
 
 if uploaded_file is not None:
-    # Cargar y procesar el archivo certificado
-    certificado = cargar_certificado(uploaded_file)
-    plantilla = cargar_plantilla()
+    # Cargar los datos
+    df = load_data(uploaded_file)
 
-    if plantilla:
-        # Procesar datos y copiarlos a la plantilla
-        procesar_datos(certificado, plantilla)
-    
-        st.success("Los datos han sido procesados y copiados exitosamente.")
-    
-        # Generar botones para exportar a CSV
-        if st.button('Exportar hoja O a CSV'):
-            csv_o = generar_csv('O', plantilla)
-            st.download_button('Descargar CSV de hoja O', csv_o, file_name="hoja_O.csv", mime='text/csv')
-    
-        if st.button('Exportar hoja DP a CSV'):
-            csv_dp = generar_csv('DP', plantilla)
-            st.download_button('Descargar CSV de hoja DP', csv_dp, file_name="hoja_DP.csv", mime='text/csv')
-    
-        if st.button('Exportar hoja STD a CSV'):
-            csv_std = generar_csv('STD', plantilla)
-            st.download_button('Descargar CSV de hoja STD', csv_std, file_name="hoja_STD.csv", mime='text/csv')
+    # Botón para exportar la hoja "O"
+    if st.button('Exportar Hoja O'):
+        df_cleaned = clean_data(df, "O")
+        writer_o = copy_data_to_template(df_cleaned, "O", selected_name)
+        file_o = to_downloadable_excel(writer_o)
+        st.download_button("Descargar Hoja O", file_o, file_name="plantilla_O.xlsx")
+
+    # Botón para exportar la hoja "DP"
+    if st.button('Exportar Hoja DP'):
+        df_cleaned = clean_data(df, "DP")
+        writer_dp = copy_data_to_template(df_cleaned, "DP", selected_name)
+        file_dp = to_downloadable_excel(writer_dp)
+        st.download_button("Descargar Hoja DP", file_dp, file_name="plantilla_DP.xlsx")
+
+    # Botón para exportar la hoja "STD"
+    if st.button('Exportar Hoja STD'):
+        df_cleaned = clean_data(df, "STD")
+        writer_std = copy_data_to_template(df_cleaned, "STD", selected_name)
+        file_std = to_downloadable_excel(writer_std)
+        st.download_button("Descargar Hoja STD", file_std, file_name="plantilla_STD.xlsx")
