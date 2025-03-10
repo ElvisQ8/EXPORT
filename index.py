@@ -13,20 +13,25 @@ def clean_data(df, sheet_name):
         df_cleaned = df_cleaned.drop(index=1)  # Eliminar la fila 2
     return df_cleaned
 
-# Función para copiar los datos según el mapeo
-def copy_data_to_template(df, sheet_name, selected_name):
-    # Crear un archivo Excel en memoria
+# Función para copiar los datos según el mapeo y modificar la plantilla
+def copy_data_to_template(df, sheet_name, selected_name, template_file):
+    # Cargar la plantilla existente
+    template = pd.ExcelFile(template_file)
+
     with BytesIO() as output:
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            # Escribir todas las hojas de la plantilla original
+            for sheet in template.sheet_names:
+                temp_df = template.parse(sheet)
+                temp_df.to_excel(writer, sheet_name=sheet, index=False)
 
+            # Filtrar y copiar los datos en la hoja correspondiente
             if sheet_name == "O":
                 df_filtered = df[~df[14].str.contains('DSTD|DEND', na=False)]
                 df_filtered[13] = selected_name  # Colocar el nombre en la columna "N" de la hoja "O"
-
             elif sheet_name == "DP":
                 df_filtered = df[df[14].str.contains('DEND', na=False)]
                 df_filtered[13] = selected_name  # Colocar el nombre en la columna "K" de la hoja "DP"
-
             elif sheet_name == "STD":
                 df_filtered = df[df[14].str.contains('DSTD', na=False)]
                 df_filtered[13] = selected_name  # Colocar el nombre en la columna "K" de la hoja "STD"
@@ -34,7 +39,7 @@ def copy_data_to_template(df, sheet_name, selected_name):
             # Escribir los datos procesados en la hoja correspondiente
             df_filtered.to_excel(writer, sheet_name=sheet_name, index=False)
 
-        output.seek(0)  # Posicionar el flujo al inicio antes de devolverlo
+        output.seek(0)  # Asegurarse de que el flujo esté al principio
         return output
 
 # Crear la interfaz de usuario
@@ -48,6 +53,9 @@ selected_name = st.selectbox("Selecciona un nombre", names)
 # Cargar el archivo Excel subido por el usuario
 uploaded_file = st.file_uploader("Sube el archivo .xlsx", type=["xlsx"])
 
+# Cargar la plantilla
+template_file = "plantilla_export.xlsx"  # Asegúrate de que esta plantilla esté disponible en tu entorno
+
 if uploaded_file is not None:
     # Cargar los datos
     df = load_data(uploaded_file)
@@ -55,17 +63,17 @@ if uploaded_file is not None:
     # Botón para exportar la hoja "O"
     if st.button('Exportar Hoja O'):
         df_cleaned = clean_data(df, "O")
-        file_o = copy_data_to_template(df_cleaned, "O", selected_name)
-        st.download_button("Descargar Hoja O", file_o, file_name="plantilla_O.xlsx")
+        file_o = copy_data_to_template(df_cleaned, "O", selected_name, template_file)
+        st.download_button("Descargar Hoja O", data=file_o.getvalue(), file_name="plantilla_O.xlsx")
 
     # Botón para exportar la hoja "DP"
     if st.button('Exportar Hoja DP'):
         df_cleaned = clean_data(df, "DP")
-        file_dp = copy_data_to_template(df_cleaned, "DP", selected_name)
-        st.download_button("Descargar Hoja DP", file_dp, file_name="plantilla_DP.xlsx")
+        file_dp = copy_data_to_template(df_cleaned, "DP", selected_name, template_file)
+        st.download_button("Descargar Hoja DP", data=file_dp.getvalue(), file_name="plantilla_DP.xlsx")
 
     # Botón para exportar la hoja "STD"
     if st.button('Exportar Hoja STD'):
         df_cleaned = clean_data(df, "STD")
-        file_std = copy_data_to_template(df_cleaned, "STD", selected_name)
-        st.download_button("Descargar Hoja STD", file_std, file_name="plantilla_STD.xlsx")
+        file_std = copy_data_to_template(df_cleaned, "STD", selected_name, template_file)
+        st.download_button("Descargar Hoja STD", data=file_std.getvalue(), file_name="plantilla_STD.xlsx")
