@@ -1,7 +1,9 @@
 import streamlit as st
 import pandas as pd
 import openpyxl
-from io import BytesIO
+
+# Ruta local del archivo plantilla
+PLANTILLA_PATH = "plantilla_export.xlsx"
 
 # Función para cargar el archivo certificado
 def cargar_certificado(file):
@@ -10,13 +12,14 @@ def cargar_certificado(file):
     st.write(df.head())  # Mostrar las primeras filas para verificar las columnas
     return df
 
-# Función para cargar la plantilla desde GitHub
+# Función para cargar la plantilla desde la ruta local
 def cargar_plantilla():
-    # Cargar el archivo plantilla_export.xlsx directamente desde GitHub
-    url = "https://raw.githubusercontent.com/tu_usuario/tu_repositorio/main/plantilla_export.xlsx"
-    response = BytesIO(requests.get(url).content)
-    plantilla = openpyxl.load_workbook(response)
-    return plantilla
+    try:
+        plantilla = openpyxl.load_workbook(PLANTILLA_PATH)
+        return plantilla
+    except FileNotFoundError:
+        st.error(f"El archivo {PLANTILLA_PATH} no se encuentra en el directorio.")
+        return None
 
 # Función para aplicar filtros y copiar los datos filtrados a la plantilla
 def procesar_datos(certificado, plantilla):
@@ -79,5 +82,4 @@ if uploaded_file is not None:
             st.success("Hoja 'DP' exportada a CSV.")
     
         if st.button('Exportar hoja STD a CSV'):
-            exportar_csv('STD', plantilla)
-            st.success("Hoja 'STD' exportada a CSV.")
+            exportar_csv('STD', plantilla
