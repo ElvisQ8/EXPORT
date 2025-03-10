@@ -10,9 +10,7 @@ def cargar_certificado(file):
     # Cargar los datos desde la fila 27 hasta la 127, considerando la fila 26 como cabecera
     df = pd.read_excel(file, sheet_name=0, header=25, skiprows=0, nrows=101)
     
-    # Rellenar los valores vacíos con la palabra "HOLA"
-    df.fillna("HOLA", inplace=True)
-    
+    # Verificar las columnas del DataFrame cargado
     st.write("Columnas del archivo certificado:")
     st.write(df.columns)  # Mostrar las columnas para verificar su nombre
     st.write(df.head())  # Mostrar las primeras filas para verificar los datos
@@ -34,20 +32,23 @@ def procesar_datos(certificado, plantilla):
     hoja_dp = plantilla["DP"]
     hoja_std = plantilla["STD"]
     
+    # Rellenar los valores vacíos con la palabra "HOLA"
+    certificado.fillna("HOLA", inplace=True)
+
     # Filtrar para la hoja "O" (sin "DEND" ni "DSTD")
-    datos_o = certificado[~certificado['O'].str.contains('DEND|DSTD', na=False)]
+    datos_o = certificado[~certificado.iloc[:, 14].str.contains('DEND|DSTD', na=False)]  # Usar columna 15 (índice 14)
     for i, row in datos_o.iterrows():
         hoja_o.append([row['A'], row['B'], row['C'], row['D'], row['E'], row['F'], row['G'], row['H'],
                        row['I'], row['J'], row['K'], row['L'], row['N'], None, row['Q'], None, row['R']])
 
     # Filtrar para la hoja "DP" (con "DEND")
-    datos_dp = certificado[certificado['O'].str.contains('DEND', na=False)]
+    datos_dp = certificado[certificado.iloc[:, 14].str.contains('DEND', na=False)]  # Usar columna 15 (índice 14)
     for i, row in datos_dp.iterrows():
         hoja_dp.append([row['A'], row['B'], row['C'], row['D'], row['E'], row['F'], row['G'], row['H'],
                        row['I'], row['J'], row['K'], row['O'], row['N'], row['Q'], None, row['R']])
 
     # Filtrar para la hoja "STD" (con "DSTD")
-    datos_std = certificado[certificado['O'].str.contains('DSTD', na=False)]
+    datos_std = certificado[certificado.iloc[:, 14].str.contains('DSTD', na=False)]  # Usar columna 15 (índice 14)
     for i, row in datos_std.iterrows():
         hoja_std.append([row['A'], row['E'], row['G'], row['H'], row['I'], row['J'], row['K'], row['PECLSTDEN02'],
                         row['N'], row['Q'], None, row['R']])
