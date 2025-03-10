@@ -36,50 +36,50 @@ def copy_data_to_template(df, sheet_name, selected_name, template_file):
 
             # Mapeo de columnas para la hoja "O"
             if sheet_name == "O":
-                # Mapeo columna por columna de acuerdo con las instrucciones
-                writer.sheets[sheet_name].write_column('B2', df_filtered[0].values)  # Columna 0 -> Columna B
-                writer.sheets[sheet_name].write_column('C2', df_filtered[1].values)  # Columna 1 -> Columna C
-                writer.sheets[sheet_name].write_column('D2', df_filtered[2].values)  # Columna 2 -> Columna D
-                writer.sheets[sheet_name].write_column('E2', df_filtered[3].values)  # Columna 3 -> Columna E
-                writer.sheets[sheet_name].write_column('F2', df_filtered[4].values)  # Columna 4 -> Columna F
-                writer.sheets[sheet_name].write_column('G2', df_filtered[5].values)  # Columna 5 -> Columna G
-                writer.sheets[sheet_name].write_column('H2', df_filtered[6].values)  # Columna 6 -> Columna H
-                writer.sheets[sheet_name].write_column('I2', df_filtered[7].values)  # Columna 7 -> Columna I
-                writer.sheets[sheet_name].write_column('J2', df_filtered[8].values)  # Columna 8 -> Columna J
-                writer.sheets[sheet_name].write_column('K2', df_filtered[9].values)  # Columna 9 -> Columna K
-                writer.sheets[sheet_name].write_column('L2', df_filtered[10].values)  # Columna 10 -> Columna L
-                writer.sheets[sheet_name].write_column('M2', df_filtered[11].values)  # Columna 11 -> Columna M
-                writer.sheets[sheet_name].write_column('O2', df_filtered[13].values)  # Columna 13 -> Columna O
-                writer.sheets[sheet_name].write_column('Q2', df_filtered[16].values)  # Columna 16 -> Columna Q
+                # Convertir valores a texto y asegurar que no sean nulos o inválidos
+                writer.sheets[sheet_name].write_column('B2', df_filtered[0].fillna('').astype(str).values)  # Columna 0 -> Columna B
+                writer.sheets[sheet_name].write_column('C2', df_filtered[1].fillna('').astype(str).values)  # Columna 1 -> Columna C
+                writer.sheets[sheet_name].write_column('D2', df_filtered[2].fillna('').astype(str).values)  # Columna 2 -> Columna D
+                writer.sheets[sheet_name].write_column('E2', df_filtered[3].fillna('').astype(str).values)  # Columna 3 -> Columna E
+                writer.sheets[sheet_name].write_column('F2', df_filtered[4].fillna('').astype(str).values)  # Columna 4 -> Columna F
+                writer.sheets[sheet_name].write_column('G2', df_filtered[5].fillna('').astype(str).values)  # Columna 5 -> Columna G
+                writer.sheets[sheet_name].write_column('H2', df_filtered[6].fillna('').astype(str).values)  # Columna 6 -> Columna H
+                writer.sheets[sheet_name].write_column('I2', df_filtered[7].fillna('').astype(str).values)  # Columna 7 -> Columna I
+                writer.sheets[sheet_name].write_column('J2', df_filtered[8].fillna('').astype(str).values)  # Columna 8 -> Columna J
+                writer.sheets[sheet_name].write_column('K2', df_filtered[9].fillna('').astype(str).values)  # Columna 9 -> Columna K
+                writer.sheets[sheet_name].write_column('L2', df_filtered[10].fillna('').astype(str).values)  # Columna 10 -> Columna L
+                writer.sheets[sheet_name].write_column('M2', df_filtered[11].fillna('').astype(str).values)  # Columna 11 -> Columna M
+                writer.sheets[sheet_name].write_column('O2', df_filtered[13].fillna('').astype(str).values)  # Columna 13 -> Columna O
+                writer.sheets[sheet_name].write_column('Q2', df_filtered[16].fillna('').astype(str).values)  # Columna 16 -> Columna Q
 
             # Mapeo para la hoja "DP"
             elif sheet_name == "DP":
-                writer.sheets[sheet_name].write_column('B2', df_filtered[0].values)  # Columna 0 -> Columna B
-                writer.sheets[sheet_name].write_column('C2', df_filtered[1].values)  # Columna 1 -> Columna C
-                writer.sheets[sheet_name].write_column('D2', df_filtered[2].values)  # Columna 2 -> Columna D
-                writer.sheets[sheet_name].write_column('E2', df_filtered[3].values)  # Columna 3 -> Columna E
-                writer.sheets[sheet_name].write_column('F2', df_filtered[6].values)  # Columna 6 -> Columna F
-                writer.sheets[sheet_name].write_column('G2', df_filtered[7].values)  # Columna 7 -> Columna G
-                writer.sheets[sheet_name].write_column('H2', df_filtered[8].values)  # Columna 8 -> Columna H
-                writer.sheets[sheet_name].write_column('I2', df_filtered[9].values)  # Columna 9 -> Columna I
-                writer.sheets[sheet_name].write_column('J2', df_filtered[10].values)  # Columna 10 -> Columna J
-                writer.sheets[sheet_name].write_column('K2', df_filtered[14].values)  # Columna 14 -> Columna K
-                writer.sheets[sheet_name].write_column('L2', df_filtered[13].values)  # Columna 13 -> Columna L
-                writer.sheets[sheet_name].write_column('M2', df_filtered[16].values)  # Columna 16 -> Columna M
-                writer.sheets[sheet_name].write_column('O2', df_filtered[17].values)  # Columna 17 -> Columna O
+                writer.sheets[sheet_name].write_column('B2', df_filtered[0].fillna('').astype(str).values)  # Columna 0 -> Columna B
+                writer.sheets[sheet_name].write_column('C2', df_filtered[1].fillna('').astype(str).values)  # Columna 1 -> Columna C
+                writer.sheets[sheet_name].write_column('D2', df_filtered[2].fillna('').astype(str).values)  # Columna 2 -> Columna D
+                writer.sheets[sheet_name].write_column('E2', df_filtered[3].fillna('').astype(str).values)  # Columna 3 -> Columna E
+                writer.sheets[sheet_name].write_column('F2', df_filtered[6].fillna('').astype(str).values)  # Columna 6 -> Columna F
+                writer.sheets[sheet_name].write_column('G2', df_filtered[7].fillna('').astype(str).values)  # Columna 7 -> Columna G
+                writer.sheets[sheet_name].write_column('H2', df_filtered[8].fillna('').astype(str).values)  # Columna 8 -> Columna H
+                writer.sheets[sheet_name].write_column('I2', df_filtered[9].fillna('').astype(str).values)  # Columna 9 -> Columna I
+                writer.sheets[sheet_name].write_column('J2', df_filtered[10].fillna('').astype(str).values)  # Columna 10 -> Columna J
+                writer.sheets[sheet_name].write_column('K2', df_filtered[14].fillna('').astype(str).values)  # Columna 14 -> Columna K
+                writer.sheets[sheet_name].write_column('L2', df_filtered[13].fillna('').astype(str).values)  # Columna 13 -> Columna L
+                writer.sheets[sheet_name].write_column('M2', df_filtered[16].fillna('').astype(str).values)  # Columna 16 -> Columna M
+                writer.sheets[sheet_name].write_column('O2', df_filtered[17].fillna('').astype(str).values)  # Columna 17 -> Columna O
 
             # Mapeo para la hoja "STD"
             elif sheet_name == "STD":
-                writer.sheets[sheet_name].write_column('B2', df_filtered[0].values)  # Columna 0 -> Columna B
-                writer.sheets[sheet_name].write_column('C2', df_filtered[4].values)  # Columna 4 -> Columna C
-                writer.sheets[sheet_name].write_column('D2', df_filtered[6].values)  # Columna 6 -> Columna D
-                writer.sheets[sheet_name].write_column('E2', df_filtered[7].values)  # Columna 7 -> Columna E
-                writer.sheets[sheet_name].write_column('F2', df_filtered[8].values)  # Columna 8 -> Columna F
-                writer.sheets[sheet_name].write_column('G2', df_filtered[9].values)  # Columna 9 -> Columna G
-                writer.sheets[sheet_name].write_column('H2', df_filtered[10].values)  # Columna 10 -> Columna H
-                writer.sheets[sheet_name].write_column('I2', df_filtered[13].values)  # Columna 13 -> Columna I
-                writer.sheets[sheet_name].write_column('J2', df_filtered[16].values)  # Columna 16 -> Columna J
-                writer.sheets[sheet_name].write_column('L2', df_filtered[17].values)  # Columna 17 -> Columna L
+                writer.sheets[sheet_name].write_column('B2', df_filtered[0].fillna('').astype(str).values)  # Columna 0 -> Columna B
+                writer.sheets[sheet_name].write_column('C2', df_filtered[4].fillna('').astype(str).values)  # Columna 4 -> Columna C
+                writer.sheets[sheet_name].write_column('D2', df_filtered[6].fillna('').astype(str).values)  # Columna 6 -> Columna D
+                writer.sheets[sheet_name].write_column('E2', df_filtered[7].fillna('').astype(str).values)  # Columna 7 -> Columna E
+                writer.sheets[sheet_name].write_column('F2', df_filtered[8].fillna('').astype(str).values)  # Columna 8 -> Columna F
+                writer.sheets[sheet_name].write_column('G2', df_filtered[9].fillna('').astype(str).values)  # Columna 9 -> Columna G
+                writer.sheets[sheet_name].write_column('H2', df_filtered[10].fillna('').astype(str).values)  # Columna 10 -> Columna H
+                writer.sheets[sheet_name].write_column('I2', df_filtered[13].fillna('').astype(str).values)  # Columna 13 -> Columna I
+                writer.sheets[sheet_name].write_column('J2', df_filtered[16].fillna('').astype(str).values)  # Columna 16 -> Columna J
+                writer.sheets[sheet_name].write_column('L2', df_filtered[17].fillna('').astype(str).values)  # Columna 17 -> Columna L
 
         output.seek(0)  # Asegurarse de que el flujo esté al principio
         return output.getvalue()
