@@ -40,7 +40,7 @@ def copy_data_to_template(df, sheet_name, selected_name, template_file):
             df_filtered.to_excel(writer, sheet_name=sheet_name, index=False)
 
         output.seek(0)  # Asegurarse de que el flujo esté al principio
-        return output
+        return output.getvalue()
 
 # Crear la interfaz de usuario
 st.title("Exportar Datos a Plantilla Excel")
@@ -64,16 +64,16 @@ if uploaded_file is not None:
     if st.button('Exportar Hoja O'):
         df_cleaned = clean_data(df, "O")
         file_o = copy_data_to_template(df_cleaned, "O", selected_name, template_file)
-        st.download_button("Descargar Hoja O", data=file_o.getvalue(), file_name="plantilla_O.xlsx")
+        st.download_button("Descargar Hoja O", data=file_o, file_name="plantilla_O.xlsx")
 
     # Botón para exportar la hoja "DP"
     if st.button('Exportar Hoja DP'):
         df_cleaned = clean_data(df, "DP")
         file_dp = copy_data_to_template(df_cleaned, "DP", selected_name, template_file)
-        st.download_button("Descargar Hoja DP", data=file_dp.getvalue(), file_name="plantilla_DP.xlsx")
+        st.download_button("Descargar Hoja DP", data=file_dp, file_name="plantilla_DP.xlsx")
 
     # Botón para exportar la hoja "STD"
     if st.button('Exportar Hoja STD'):
         df_cleaned = clean_data(df, "STD")
         file_std = copy_data_to_template(df_cleaned, "STD", selected_name, template_file)
-        st.download_button("Descargar Hoja STD", data=file_std.getvalue(), file_name="plantilla_STD.xlsx")
+        st.download_button("Descargar Hoja STD", data=file_std, file_name="plantilla_STD.xlsx")
