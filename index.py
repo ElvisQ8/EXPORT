@@ -57,7 +57,7 @@ if certificado_file:
     certificado_df = pd.read_excel(certificado_file, sheet_name='PECLD07826', skiprows=26)  # Fila 27 es la 26 en 0-indexed
     
     # Cargar la plantilla desde el archivo PLANTILLA_EXPORT.xlsx (se asume que está en el mismo directorio que index.py)
-    plantilla_file = "PLANTILLA_EXPORT.xlsx"
+    plantilla_file = "PLANTILA_EXPORT.xlsx"
     plantilla_df = pd.read_excel(plantilla_file, sheet_name=None)  # Cargar todas las hojas de la plantilla
 
     # Procesar los datos y copiarlos a la plantilla
