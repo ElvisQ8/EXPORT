@@ -15,33 +15,29 @@ def clean_data(df, sheet_name):
 
 # Función para copiar los datos según el mapeo
 def copy_data_to_template(df, sheet_name, selected_name):
-    # Crear un nuevo archivo Excel para almacenar los datos procesados
-    writer = pd.ExcelWriter(f'{sheet_name}_template.xlsx', engine='xlsxwriter')
+    # Crear un archivo Excel en memoria
+    with BytesIO() as output:
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
 
-    if sheet_name == "O":
-        df_filtered = df[~df[14].str.contains('DSTD|DEND', na=False)]
-        df_filtered[13] = selected_name  # Colocar el nombre en la columna "N" de la hoja "O"
+            if sheet_name == "O":
+                df_filtered = df[~df[14].str.contains('DSTD|DEND', na=False)]
+                df_filtered[13] = selected_name  # Colocar el nombre en la columna "N" de la hoja "O"
 
-    elif sheet_name == "DP":
-        df_filtered = df[df[14].str.contains('DEND', na=False)]
-        df_filtered[13] = selected_name  # Colocar el nombre en la columna "K" de la hoja "DP"
+            elif sheet_name == "DP":
+                df_filtered = df[df[14].str.contains('DEND', na=False)]
+                df_filtered[13] = selected_name  # Colocar el nombre en la columna "K" de la hoja "DP"
 
-    elif sheet_name == "STD":
-        df_filtered = df[df[14].str.contains('DSTD', na=False)]
-        df_filtered[13] = selected_name  # Colocar el nombre en la columna "K" de la hoja "STD"
-    
-    # Escribir los datos procesados en la hoja correspondiente del archivo Excel
-    df_filtered.to_excel(writer, sheet_name=sheet_name, index=False)
-    writer.close()  # Usar 'close()' en vez de 'save()'
-    return writer
+            elif sheet_name == "STD":
+                df_filtered = df[df[14].str.contains('DSTD', na=False)]
+                df_filtered[13] = selected_name  # Colocar el nombre en la columna "K" de la hoja "STD"
+            
+            # Escribir los datos procesados en la hoja correspondiente
+            df_filtered.to_excel(writer, sheet_name=sheet_name, index=False)
+            writer.save()
 
-# Función para convertir el archivo en un archivo descargable
-def to_downloadable_excel(writer):
-    # Convertir el archivo Excel en un archivo descargable
-    file = BytesIO()
-    writer.save(file)
-    file.seek(0)
-    return file
+        # Retornar el archivo Excel en formato BytesIO para ser descargado
+        output.seek(0)
+        return output
 
 # Crear la interfaz de usuario
 st.title("Exportar Datos a Plantilla Excel")
@@ -61,20 +57,17 @@ if uploaded_file is not None:
     # Botón para exportar la hoja "O"
     if st.button('Exportar Hoja O'):
         df_cleaned = clean_data(df, "O")
-        writer_o = copy_data_to_template(df_cleaned, "O", selected_name)
-        file_o = to_downloadable_excel(writer_o)
+        file_o = copy_data_to_template(df_cleaned, "O", selected_name)
         st.download_button("Descargar Hoja O", file_o, file_name="plantilla_O.xlsx")
 
     # Botón para exportar la hoja "DP"
     if st.button('Exportar Hoja DP'):
         df_cleaned = clean_data(df, "DP")
-        writer_dp = copy_data_to_template(df_cleaned, "DP", selected_name)
-        file_dp = to_downloadable_excel(writer_dp)
+        file_dp = copy_data_to_template(df_cleaned, "DP", selected_name)
         st.download_button("Descargar Hoja DP", file_dp, file_name="plantilla_DP.xlsx")
 
     # Botón para exportar la hoja "STD"
     if st.button('Exportar Hoja STD'):
         df_cleaned = clean_data(df, "STD")
-        writer_std = copy_data_to_template(df_cleaned, "STD", selected_name)
-        file_std = to_downloadable_excel(writer_std)
+        file_std = copy_data_to_template(df_cleaned, "STD", selected_name)
         st.download_button("Descargar Hoja STD", file_std, file_name="plantilla_STD.xlsx")
