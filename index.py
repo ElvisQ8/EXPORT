@@ -54,7 +54,7 @@ if certificado_file:
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
                 df_filtrado.to_excel(writer, sheet_name=hoja, index=False)
-                writer.save()
+
             
             st.download_button(
                 label=f"Descargar {hoja}.xlsx",
