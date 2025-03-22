@@ -30,9 +30,9 @@ def copy_data_to_template(df, sheet_name, selected_name, template_file):
                 df_filtered[13] = selected_name  # Colocar el nombre en la columna "N" de la hoja "O"
                 # Mapeo de columnas para "O"
                 columns_mapping_o = [
-                    (0, 'B'), (1, 'C'), (2, 'D'), (3, 'E'), (4, 'F'),
-                    (5, 'G'), (6, 'H'), (7, 'I'), (8, 'J'), (9, 'K'),
-                    (10, 'L'), (11, 'M'), (13, 'O'), (16, 'Q')
+                    (0, 'A'), (1, 'B'), (2, 'C'), (3, 'D'), (4, 'E'),
+                    (5, 'F'), (6, 'G'), (7, 'H'), (8, 'I'), (9, 'J'),
+                    (10, 'K'), (11, 'L'), (13, 'P'), (16, 'O')
                 ]
                 for df_col, template_col in columns_mapping_o:
                     writer.sheets[sheet_name].write_column(f'{template_col}2', df_filtered[df_col].fillna('').astype(str).values)
