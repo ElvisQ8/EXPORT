@@ -55,7 +55,7 @@ def copy_data_to_template(df, sheet_name, selected_name, template_file):
                 # Mapeo de columnas para "STD"
                 columns_mapping_std = [
                     (0, 'A'), (4, 'B'), (6, 'C'), (7, 'D'), (8, 'E'),
-                    (9, 'F'), (10, 'G'), (11, 'H'), (13, 'I'), (16, 'J'),
+                    (9, 'F'), (10, 'G'), (11, 'H'), (13, 'K'), (16, 'J'),
                     (17, 'L')
                 ]
                 # En este caso, el valor "PECLSTDEN02" lo tratamos como un valor específico
